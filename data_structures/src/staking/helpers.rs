@@ -241,7 +241,9 @@ where
         + Saturating
         + Send
         + Sub<Output = Epoch>
-        + Sync,
+        + Sync
+        + Add<Output = Epoch>
+        + Div<Output = Epoch>,
     Power:
         Add<Output = Power> + Copy + Default + DeserializeOwned + Div<Output = Power> + Ord + Sum,
     u64: From<Coins> + From<Power>,
@@ -288,7 +290,9 @@ where
         + Send
         + Saturating
         + Sub<Output = Epoch>
-        + Sync,
+        + Sync
+        + Add<Output = Epoch>
+        + Div<Output = Epoch>,
     Power: Add<Output = Power> + Copy + Default + Div<Output = Power> + Ord + Sum,
     u64: From<Coins> + From<Power>,
 {
