@@ -1,7 +1,7 @@
 use std::{
     fmt::{Debug, Display},
     iter::Sum,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Add, Div, Mul, Rem, Sub},
 };
 use witnet_data_structures::staking::prelude::*;
 
@@ -109,6 +109,8 @@ where
         + Sub<Output = Coins>
         + Mul
         + Mul<Epoch, Output = Power>
+        + Div<Output = Coins>
+        + Rem<Output = Coins>
         + Sync
         + Send
         + Sum

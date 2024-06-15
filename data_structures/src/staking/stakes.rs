@@ -2,7 +2,7 @@ use std::{
     collections::{btree_map::Entry, BTreeMap},
     fmt::{Debug, Display},
     iter::Sum,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Add, Div, Mul, Rem, Sub},
 };
 
 use itertools::Itertools;
@@ -91,7 +91,7 @@ where
 
 impl<Address, Coins, Epoch, Power> Stakes<Address, Coins, Epoch, Power>
 where
-    Address: Clone + Debug + Default + Ord + Send + Sync + Display,
+    Address: Clone + Debug + Default + Ord + Send + Sync + Display + 'static,
     Coins: Copy
         + Default
         + Ord
@@ -106,7 +106,9 @@ where
         + Send
         + Sync
         + Display
-        + Sum,
+        + Sum
+        + Div<Output = Coins>
+        + Rem<Output = Coins>,
     Epoch: Copy
         + Default
         + Saturating
@@ -308,6 +310,37 @@ where
         });
 
         Ok(())
+    }
+
+    /// Add a reward to the validator's balance
+    pub fn add_reward<ISK>(
+        &mut self,
+        validator: ISK,
+        coins: Coins,
+        current_epoch: Epoch,
+    ) -> StakesResult<Coins, Address, Coins, Epoch>
+    where
+        ISK: Into<Address>,
+    {
+        let validator = validator.into();
+
+        let stakes = self
+            .by_validator
+            .get_mut(&validator)
+            .ok_or(StakesError::ValidatorNotFound { validator })?;
+
+        let distribute_coins = coins / Coins::from(stakes.len() as u64);
+        let remainder_coins = coins % Coins::from(stakes.len() as u64);
+
+        stakes.iter_mut().for_each(|stake| {
+            let _ = stake.value.write().unwrap().add_stake(
+                distribute_coins,
+                current_epoch,
+                Some(0.into()),
+            );
+        });
+
+        Ok(remainder_coins)
     }
 
     /// Creates an instance of `Stakes` with a custom minimum stakeable amount.
