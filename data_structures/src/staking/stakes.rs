@@ -351,6 +351,7 @@ where
         }
     }
 
+    /// Rebuild stakes tracker using by_key entries
     pub fn with_entries(
         entries: BTreeMap<StakeKey<Address>, SyncStake<Address, Coins, Epoch, Power>>,
     ) -> Self {
